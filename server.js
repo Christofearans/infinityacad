@@ -9,6 +9,11 @@ app.use(cors());
 let users = [];
 let announcements = [];
 
+// Default route
+app.get('/', (req, res) => {
+  res.send('Welcome to the Admin Dashboard API!');
+});
+
 // Endpoint to get all users
 app.get('/users', (req, res) => {
   res.json(users);
@@ -54,3 +59,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
