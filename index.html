@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutoring Program - Infinity Academy</title>
+
+  <style>
+    
+    /* General reset */
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1a1a1a;
+      color: #fff;
+      box-sizing: border-box;
+    }
+  
+    /* Logo styling */
+    .logo {
+      position: absolute;
+      top: 25px;
+      left: 30px;
+      height: 80px; /* Smaller logo size */
+    }
+  
+/* Modal (Popup) Styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Fixed to viewport */
+  z-index: 1000; /* Ensure it sits on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Black with opacity */
+  padding-top: 60px;
+}
+
+/* Modal content aligned to the right */
+.modal-content {
+  background-color: #444;
+  position: absolute; /* Position relative to modal container */
+  top: 40%; /* Center vertically */
+  right: 10%; /* Align to the right side with some margin */
+  transform: translateY(-50%); /* Offset for vertical centering */
+  padding: 20px; /* Inner padding for content */
+  border-radius: 8px; /* Rounded corners */
+  width: 40%; /* Set width of the popup */
+  box-sizing: border-box;
+  z-index: 1001; /* Ensure it stays above the background overlay */
+}
+
+/* Close button styling */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+  
+    /* Header styling */
+    header {
+      background-color: #000;
+      padding: 20px 0;
+      text-align: center;
+    }
+  
+    header h1 {
+      color: #00b3e6;
+      font-size: 3em;
+      margin: 0;
+    }
+  
+    header p {
+      font-size: 1.2em;
+      margin: 5px 0;
+    }
+  
+    /* Content styling */
+    #home {
+      display: flex;
+      justify-content: center;
+      padding: 30px 20px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+  /* Announcements Bar */
+#announcements {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Announcements title styling */
+#announcements h2 {
+  font-size: 1.8em;
+  color: #00b3e6;
+  margin-bottom: 10px;
+}
+
+/* Announcement individual item styling */
+.announcement {
+  font-size: 1.1em;
+  display: none;
+  margin-bottom: 20px;
+}
+
+/* Announcement image styling */
+.announcement img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Announcement text styling */
+.announcement-text {
+  margin-top: 10px;
+}
+
+/* Make the active announcement visible */
+.active {
+  display: block;
+}
+/* Announcements styling */
+#announcements {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  width: 45%;
+  box-sizing: border-box;
+  position: relative; /* Needed for absolute positioning of buttons */
+}
+
+#announcements h2 {
+  font-size: 1.8em;
+  color: #00b3e6;
+}
+
+.announcement {
+  font-size: 1.1em;
+  display: none;
+  margin-bottom: 20px;
+}
+
+.announcement img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.announcement-text {
+  margin-top: 10px;
+}
+
+.active {
+  display: block;
+}
+
+/* Announcement control buttons */
+#announcement-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+}
+
+#pause-btn, #continue-btn {
+  padding: 8px 15px;
+  background-color: #00b3e6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+#pause-btn:hover, #continue-btn:hover {
+  background-color: #008c99;
+}
+
+/* Form styling */
+#login-form, #register-form {
+  background-color: #444;
+  padding: 30px;
+  border-radius: 8px;
+  width: 45%;
+  box-sizing: border-box;
+}
+
+input, select, button {
+  padding: 12px;
+  margin: 12px 0;
+  width: 100%;
+  border: none;
+  border-radius: 5px;
+  background-color: #333;
+  color: #fff;
+  font-size: 1em;
+}
+
+button {
+  background-color: #00b3e6;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #008c99;
+}
+
+
+  
+    .error-message {
+      color: red;
+      font-size: 14px;
+    }
+  
+    a {
+      color: #00b3e6;
+      text-decoration: none;
+    }
+  
+    a:hover {
+      text-decoration: underline;
+    }
+  
+    .hidden {
+      display: none;
+    }
+  
+    /* Password Strength Indicator Styles */
+    .password-strength {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  
+    .weak {
+      color: red;
+    }
+  
+    .moderate {
+      color: orange;
+    }
+  
+    .strong {
+      color: green;
+    }
+  
+    /* Modal background */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4); /* Black with opacity */
+      padding-top: 60px;
+    }
+  
+    .announcement-time {
+      font-size: 0.9em;
+      color: #bbb;
+      margin-top: 10px;
+      text-align: right;
+      font-style: italic;
+    }
+  
+    /* Media Queries for Responsiveness */
+    @media (max-width: 768px) {
+      /* Make #home layout column on smaller screens */
+      #home {
+        flex-direction: column;
+        align-items: center;
+      }
+  
+      /* Adjust forms and announcements width */
+      #announcements, #login-form, #register-form {
+        width: 90%;
+        margin-bottom: 20px;
+      }
+  
+      header h1 {
+        font-size: 2.5em;
+      }
+  
+      header p {
+        font-size: 1.1em;
+      }
+  
+      /* Logo positioning adjustments for smaller devices */
+      .logo {
+        top: 10px;
+        left: 20px;
+        height: 60px;
+      }
+    }
+  
+    @media (max-width: 480px) {
+      /* Smaller screens adjustments */
+      header h1 {
+        font-size: 2em;
+      }
+  
+      header p {
+        font-size: 1em;
+      }
+  
+      .form-container {
+        padding: 15px;
+        width: 95%;
+      }
+  
+      .form-container button {
+        font-size: 1.2em;
+        padding: 14px;
+      }
+  
+      .qr-code img {
+        width: 100px;
+      }
+  
+      #announcements {
+        padding: 18px;
+      }
+  
+      #announcements h2 {
+        font-size: 1.5em;
+      }
+  
+      #text-announcement {
+        font-size: 1em;
+      }
+  
+      /* Logo adjustments for very small screens */
+      .logo {
+        top: 5px;
+        left: 10px;
+        height: 50px;
+      }
+    }
+
+    @media (max-width: 768px) {
+  .modal-content {
+    width: 90%; /* Full width on smaller screens */
+    right: auto; /* Remove right alignment */
+    left: 5%; /* Center horizontally */
+  }
+}
+
+
+  </style>
+
+
+  
+</head>
+<body>
+
+  <header>
+    <h1>Infinity Academy</h1>
+    <p>Your learning journey starts here</p>
+    <div class="header">
+      <img src="logo.png" alt="Program Logo" class="logo">
+  </div>
+  </header>
+  
+  <div id="home">
+    <!-- Live Announcements -->
+    <div id="announcements">
+      <h2>Live Announcements</h2>
+      <div id="announcement-slideshow">
+        <!-- Announcements will be dynamically inserted here -->
+      </div>
+
+      <div id="announcement-controls">
+        <button id="pause-btn">Pause</button>
+        <button id="continue-btn" style="display: none;">Continue</button>
+      </div>
+      
+    </div>
+  
+    <!-- Login & Register Forms -->
+    <div id="login-form" class="form-container">
+      <h3>Login to Access Your Content</h3>
+      <label for="login-username">Username:</label>
+      <input type="text" id="login-username" placeholder="Enter username">
+      <label for="login-password">Password:</label>
+      <input type="password" id="login-password" placeholder="Enter password">
+      <button onclick="login()">Login</button>
+      <p id="login-error" class="error-message"></p>
+      <p>Don't have an account? <a href="javascript:void(0);" onclick="toggleForm()">Register here</a></p>
+    </div>
+  
+    <div id="register-form" class="form-container hidden">
+      <h3>Register an Account</h3>
+      <!-- Registration Form Code -->
+      <label for="register-username">Username:</label>
+      <input type="text" id="register-username" placeholder="Choose a username">
+  
+      <label for="register-learner-type">Choose Role:</label>
+      <select id="register-learner-type">
+        <option value="student">Student</option>
+        <option value="tutor">Tutor</option>
+        <option value="admin">Admin</option>
+      </select>
+  
+      <!-- Tutor-specific fields -->
+      <div id="tutor-subject-container" class="hidden">
+        <label for="register-tutor-subject">Select Subject to Teach:</label>
+        <select id="register-tutor-subject">
+          <option value="maths">Maths</option>
+          <option value="life-sciences">Life Sciences</option>
+          <option value="physical-science">Physical Science</option>
+          <option value="agricultural-science">Agricultural Science</option>
+          <option value="business-studies">Business Studies</option>
+          <option value="accounting">Accounting</option>
+          <option value="geography">Geography</option>
+          <option value="history">History</option>
+          <option value="maths-lit">Maths Lit</option>
+        </select>
+      </div>
+  
+      <label for="register-password">Password:</label>
+      <input type="password" id="register-password" placeholder="Create a password">
+  
+      <label for="register-password-confirm">Confirm Password:</label>
+      <input type="password" id="register-password-confirm" placeholder="Confirm password">
+  
+      <label for="secret-code">Enter Secret Code:</label>
+      <input type="text" id="secret-code" placeholder="Enter secret code">
+      <p id="secret-code-error" class="error-message"></p>
+  
+      <p>If you don't have a secret code, <a href="javascript:void(0);" onclick="openModal()">request it here</a>.</p>
+  
+      <button onclick="register()">Register</button>
+      <p id="register-error" class="error-message"></p>
+        
+      <p>Already have an account? <a href="javascript:void(0);" onclick="toggleForm()">Login here</a></p>
+    </div>
+        
+    <!-- Modal for requesting secret code -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>Request Secret Code</h3>
+        <p>To request your secret code, please contact us on WhatsApp:</p>
+        <a href="https://wa.me/+27608268288">Click to request on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+  
+    
+  <script>
+    // Login Functionality
+    async function login() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      
+      const response = await fetch('http://localhost:3000/users');
+      const storedUsers = await response.json();
+      
+      const userIndex = storedUsers.findIndex(user => user.username === username && user.password === password);
+      
+      if (userIndex !== -1) {
+        const user = storedUsers[userIndex];
+        const currentTime = new Date();
+        const lastSeen = new Date(user.lastSeen);
+        const timeSpent = (currentTime - lastSeen) / 1000;
+        user.totalTimeSpent += timeSpent;
+        user.lastSeen = currentTime.toISOString();
+      
+        await fetch('http://localhost:3000/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(user),
+        });
+        
+        if (user.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else if (user.role === 'tutor') {
+          window.location.href = 'tutor.html';
+        } else if (user.role === 'student') {
+          window.location.href = 'student.html';
+        }
+      } else {
+        document.getElementById('login-error').textContent = 'Invalid username or password.';
+      }
+    }
+    
+    // Register Functionality
+    async function register() {
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+      const passwordConfirm = document.getElementById('register-password-confirm').value;
+      const secretCode = document.getElementById('secret-code').value;
+      const learnerType = document.getElementById('register-learner-type').value;
+      
+      const response = await fetch('http://localhost:3000/users');
+      let storedUsers = await response.json();
+      
+      const userExists = storedUsers.some(user => user.username === username);
+      if (userExists) {
+        document.getElementById('register-error').textContent = 'Username already exists. Please choose another one.';
+        return;
+      }
+      
+      const specialChars = /[!@#$%^&*(),.?":{}|<>]/;
+      if (password.length < 6 || !specialChars.test(password)) {
+        document.getElementById('register-error').textContent = 'Password must be at least 6 characters long and include a special character.';
+        return;
+      }
+      
+      if (password !== passwordConfirm) {
+        document.getElementById('register-error').textContent = 'Passwords do not match.';
+        return;
+      }
+      
+      let validCode = false;
+      if (learnerType === "student" && (secretCode === 'UN-2024' || secretCode === 'HS-2021')) validCode = true;
+      else if (learnerType === "tutor" && secretCode === 'T-2023') validCode = true;
+      else if (learnerType === "admin" && secretCode === 'AD-12345') validCode = true;
+      if (!validCode) {
+        document.getElementById('secret-code-error').textContent = 'Invalid secret code for your role.';
+        return;
+      }
+      
+      const newUser = {
+        username,
+        password,
+        role: learnerType,
+        registrationTime: new Date().toISOString(),
+        lastSeen: new Date().toISOString(),
+        totalTimeSpent: 0
+      };
+      
+      await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      });
+      
+      alert('Registration successful! Please login to continue.');
+      window.location.href = 'index.html';
+    }
+    
+    // Toggle between login and registration forms
+    function toggleForm() {
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      loginForm.classList.toggle('hidden');
+      registerForm.classList.toggle('hidden');
+    }
+    
+    // Password Strength Functionality
+    const passwordInput = document.getElementById('register-password');
+    const passwordStrength = document.createElement('div');
+    passwordInput.insertAdjacentElement('afterend', passwordStrength);
+    
+    passwordInput.addEventListener('input', () => {
+      const passwordValue = passwordInput.value;
+      const strength = getPasswordStrength(passwordValue);
+      passwordStrength.textContent = strength.text;
+      passwordStrength.className = `password-strength ${strength.class}`;
+    });
+    
+    function getPasswordStrength(password) {
+      const strength = {
+        text: '',
+        class: ''
+      };
+      
+      const lengthCriteria = password.length >= 8;
+      const lowercase = /[a-z]/.test(password);
+      const uppercase = /[A-Z]/.test(password);
+      const numbers = /\d/.test(password);
+      const specialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      
+      if (lengthCriteria && lowercase && uppercase && numbers && specialChars) {
+        strength.text = 'Strong';
+        strength.class = 'strong';
+      } else if (lengthCriteria && (lowercase || uppercase) && numbers) {
+        strength.text = 'Moderate';
+        strength.class = 'moderate';
+      } else {
+        strength.text = 'Weak';
+        strength.class = 'weak';
+      }
+      
+      return strength;
+    }
+    
+    // Function to open the modal
+    function openModal() {
+      document.getElementById('modal').style.display = 'flex';
+    }
+    
+    // Function to close the modal
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+  
+    // Helper function to format date and time
+    function formatDateTime(dateTimeString) {
+      const dateObj = new Date(dateTimeString);
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: 'numeric', 
+        minute: 'numeric',
+        hour12: true 
+      };
+      return dateObj.toLocaleString('en-US', options);
+    }
+  
+    let currentAnnouncement = 0;
+    let announcementInterval;
+  
+    const startAnnouncementSlide = () => {
+      const announcements = document.querySelectorAll('.announcement');
+      if (announcements.length > 0) {
+        announcementInterval = setInterval(() => {
+          announcements[currentAnnouncement].classList.remove('active');
+          currentAnnouncement = (currentAnnouncement + 1) % announcements.length;
+          announcements[currentAnnouncement].classList.add('active');
+        }, 7000);
+      }
+    };
+  
+    // Pause functionality
+    const pauseSlideshow = () => {
+      clearInterval(announcementInterval);
+      document.getElementById('pause-btn').style.display = 'none';
+      document.getElementById('continue-btn').style.display = 'inline-block';
+    };
+  
+    // Continue functionality
+    const continueSlideshow = () => {
+      startAnnouncementSlide();
+      document.getElementById('pause-btn').style.display = 'inline-block';
+      document.getElementById('continue-btn').style.display = 'none';
+    };
+  
+    // Load announcements and display them
+    async function loadAnnouncements() {
+      const response = await fetch('http://localhost:3000/announcements');
+      const storedAnnouncements = await response.json();
+      const announcementSlideshow = document.getElementById('announcement-slideshow');
+      announcementSlideshow.innerHTML = '';
+  
+      storedAnnouncements.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      storedAnnouncements.forEach((announcement, index) => {
+        const announcementItem = document.createElement('div');
+        announcementItem.classList.add('announcement');
+        if (index === 0) announcementItem.classList.add('active');
+        
+        const formattedTime = new Date(announcement.timestamp).toLocaleString('en-US');
+        
+        const imageHtml = announcement.image || '';
+        const titleHtml = announcement.title ? `<div class="announcement-title">${announcement.title}</div>` : '';
+        const contentHtml = announcement.content ? `<div class="announcement-text">${announcement.content}</div>` : '';
+        const timeHtml = `<div class="announcement-time">Posted: ${formattedTime}</div>`;
+        
+        announcementItem.innerHTML = `${imageHtml}${titleHtml}${contentHtml}${timeHtml}`;
+        announcementSlideshow.appendChild(announcementItem);
+      });
+      
+      startAnnouncementSlide();
+    }
+  
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAnnouncements();
+      
+      // Set up event listeners for the Pause and Continue buttons after the page loads
+      document.getElementById('pause-btn').addEventListener('click', pauseSlideshow);
+      document.getElementById('continue-btn').addEventListener('click', continueSlideshow);
+    });
+  
+    // Format the timestamp for display
+    function formatDateTime(timestamp) {
+      const date = new Date(timestamp);
+      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      return date.toLocaleString('en-US', options);
+    }
+  </script>
+  
+      </body>
+      </html>
