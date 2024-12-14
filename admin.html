@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      margin: 20px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .section h2 {
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .form-control {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .announcement-editor {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .editor-toolbar button {
+      margin-right: 5px;
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .editor-content {
+      min-height: 100px;
+      outline: none;
+      overflow-y: auto;
+    }
+    .announcement-table img {
+      max-width: 100px;
+      max-height: 100px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 500px;
+    }
+    .close-button {
+      background: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .logout-button {
+    float: right;
+    margin-top: -30px;
+    padding: 10px 15px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  </style>
+
+</head>
+<body>
+
+  <header>
+    <h1>Admin Dashboard</h1>
+    <p>Manage registered users and track their activity</p>
+    <button class="button logout-button" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="container">
+    <section class="section">
+      <h2>Registered Users</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Last Seen</th>
+            <th>Total Time Spent</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="user-table-body"></tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Create Announcement</h2>
+      <form id="announcement-form">
+        <div class="announcement-editor">
+          <div class="editor-toolbar">
+            <button type="button" onclick="formatText('bold')">Bold</button>
+            <button type="button" onclick="formatText('italic')">Italic</button>
+            <button type="button" onclick="formatText('underline')">Underline</button>
+            <button type="button" onclick="formatText('foreColor', prompt('Enter a color:', '#000000'))">Color</button>
+          </div>
+          <div id="editor-content" class="editor-content" contenteditable="true" placeholder="Enter announcement content..."></div>
+        </div>
+        <input type="file" id="announcement-image" class="form-control" accept="image/*" />
+        <input type="text" id="announcement-image-url" class="form-control" placeholder="Enter image URL (optional)" />
+        <button type="button" class="button" onclick="addAnnouncement()">Add Announcement</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>Announcements</h2>
+      <table class="announcement-table">
+        <thead>
+          <tr>
+            <th>Content</th>
+            <th>Image</th>
+            <th>Date & Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="announcement-table-body"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <div id="user-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">User Details</div>
+      <div class="modal-body" id="user-details"></div>
+      <button class="close-button" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Format date and time
+    const formatDateTime = (timestamp) => {
+      const now = new Date();
+      const diff = now - new Date(timestamp);
+      if (diff < 60000) return "Active";
+      if (diff < 3600000) return `${Math.floor(diff / 60000)} minute(s) ago`;
+      if (diff < 86400000) return `${Math.floor(diff / 3600000)} hour(s) ago`;
+      if (diff < 604800000) return `${Math.floor(diff / 86400000)} day(s) ago`;
+      return `Last seen on ${new Date(timestamp).toLocaleDateString()}`;
+    };
+
+    // Fetch users from backend with error handling
+    const fetchUsersFromBackend = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/users');
+        if (!response.ok) throw new Error('Failed to fetch users');
+        return await response.json();
+      } catch (error) {
+        alert('Error fetching users: ' + error.message);
+      }
+    };
+
+    // Format text for editor
+    const formatText = (command, value = null) => {
+      document.execCommand(command, false, value);
+    };
+
+    // Load users and display them in the table
+    const loadUsers = async (page = 1) => {
+      const response = await fetch(`http://localhost:3000/users?page=${page}`);
+      const users = await response.json();
+      const userTableBody = document.getElementById("user-table-body");
+      userTableBody.innerHTML = "";
+
+      users.forEach((user) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${user.username}</td>
+          <td>${user.role}</td>
+          <td>${user.lastSeen ? formatDateTime(user.lastSeen) : "Never"}</td>
+          <td>${(user.totalTimeSpent / 60).toFixed(2)} min</td>
+          <td><button class="button" onclick="deleteUser('${user.username}')">Delete</button></td>
+        `;
+        userTableBody.appendChild(row);
+      });
+    };
+
+    // Delete a user from backend
+    const deleteUser = async (username) => {
+      try {
+        await fetch(`http://localhost:3000/users/${username}`, {
+          method: 'DELETE'
+        });
+        loadUsers();
+      } catch (error) {
+        alert('Error deleting user: ' + error.message);
+      }
+    };
+
+    // Logout and redirect to login page
+    const logout = () => {
+      window.location.href = "index.html";
+    };
+
+    // Handle image upload
+    const handleImageUpload = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          document.getElementById('announcement-image-url').value = reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    // Add a new announcement to backend with validation
+    const addAnnouncement = async () => {
+      const content = document.getElementById("editor-content").innerHTML.trim();
+      const imageUrl = document.getElementById("announcement-image-url").value.trim();
+
+      if (!content) {
+        alert("Please enter content.");
+        return;
+      }
+
+      const announcement = {
+        content: content,
+        image: imageUrl,
+        timestamp: new Date().toISOString(),
+      };
+
+      try {
+        await fetch('http://localhost:3000/announcements', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(announcement),
+        });
+        loadAnnouncements();  // Reload the announcements after adding
+      } catch (error) {
+        alert('Error adding announcement: ' + error.message);
+      }
+    };
+
+    // Load announcements and display them
+    const loadAnnouncements = async () => {
+      const response = await fetch('http://localhost:3000/announcements');
+      const announcements = await response.json();
+      const tableBody = document.getElementById("announcement-table-body");
+      tableBody.innerHTML = "";
+
+      announcements.forEach((announcement, index) => {
+        const formattedDate = new Date(announcement.timestamp).toLocaleString();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${announcement.content || ''}</td>
+          <td>${announcement.image ? `<img src="${announcement.image}" alt="Announcement Image" style="max-width: 100px;">` : ''}</td>
+          <td>${formattedDate}</td>
+          <td><button class="button" onclick="removeAnnouncement(${index})">Remove</button></td>
+        `;
+        tableBody.appendChild(row);
+      });
+    };
+
+    // Remove an announcement from backend
+    const removeAnnouncement = async (index) => {
+      try {
+        await fetch(`http://localhost:3000/announcements/${index}`, {
+          method: 'DELETE'
+        });
+        loadAnnouncements();
+      } catch (error) {
+        alert('Error removing announcement: ' + error.message);
+      }
+    };
+
+    // Close the modal
+    const closeModal = () => {
+      const modal = document.getElementById("user-modal");
+      modal.style.display = "none";
+    };
+
+    // Close the modal when clicking outside of it
+    window.onclick = function(event) {
+      const modal = document.getElementById("user-modal");
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+
+    // Load users and announcements on page load
+    window.onload = () => {
+      loadUsers();
+      loadAnnouncements();
+      document.getElementById('announcement-image').addEventListener('change', handleImageUpload);
+    };
+  </script>
+
+
+
+</body>
+</html>
+
